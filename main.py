@@ -1,4 +1,5 @@
 import re
+import sys
 from dataclasses import dataclass
 from enum import IntEnum
 from typing import Self
@@ -41,6 +42,9 @@ class TuringInstruction:
         direction = TuringDirection.from_str(match.group("direction"))
 
         return cls(start_state, start_val, end_state, end_val, direction)
+
+    def __str__(self):
+        return f"q{self.start_state} {int(self.start_value)} -> q{self.end_state} {int(self.end_value)} {self.direction.name}"
 
 
 class _TuringStrip:
@@ -131,8 +135,11 @@ STATE: q{self._state}
 {' ' * cursor}^
 ----------------"""
 
+    def get_instructions_description(self) -> str:
+        return "Instruction set:\n" + "\n".join(str(i) for i in self._instructions_map.values()) + "\n"
 
-def main():
+
+def main_interactive(nostep: bool):
     print("Enter instructions")
     instructions: list[TuringInstruction] = []
     while inp := input():
@@ -149,14 +156,52 @@ def main():
     initial_pos = int(input("Initial position [default 0]: ") or "0")
 
     machine = TuringMachine(instructions, word, initial_state, initial_pos)
+    print(machine.get_instructions_description())
     print(machine.get_current_description())
 
     while not machine.step():
-        input()
+        if not nostep:
+            input()
+        print(machine.get_current_description())
+
+    print("Machine ended its operation")
+
+
+def main_file(filename: str, nostep: bool = False):
+    with open(filename, "r") as f:
+        lines = [l.strip() for l in f.readlines()]
+
+    ptr = 0
+    instructions: list[TuringInstruction] = []
+    while lines[ptr]:
+        instructions.append(TuringInstruction.from_str(lines[ptr]))
+        ptr += 1
+    ptr += 1
+
+    word = [True if s == "1" else False for s in lines[ptr]]
+    ptr += 1
+
+    initial_state = int(lines[ptr])
+    initial_pos = int(lines[ptr + 1])
+
+    machine = TuringMachine(instructions, word, initial_state, initial_pos)
+    print(machine.get_instructions_description())
+    print(machine.get_current_description())
+
+    while not machine.step():
+        if not nostep:
+            input()
         print(machine.get_current_description())
 
     print("Machine ended its operation")
 
 
 if __name__ == "__main__":
-    main()
+    nostep = "--nostep" in sys.argv
+    if len(sys.argv) < 2 or len(sys.argv) == 2 and nostep:
+        main_interactive(nostep)
+    else:
+        filename = sys.argv[1]
+        if filename == "--nostep":
+            filename = sys.argv[2]
+        main_file(filename, nostep)

@@ -150,7 +150,7 @@ def main_interactive(nostep: bool):
             continue
 
     word_str = input("Enter initial word: ")
-    word = [True if s == "1" else False for s in word_str]
+    word = [s == "1" for s in word_str]
 
     initial_state = int(input("Initial state [default 1]: ") or "1")
     initial_pos = int(input("Initial position [default 0]: ") or "0")
@@ -178,7 +178,7 @@ def main_file(filename: str, nostep: bool = False):
         ptr += 1
     ptr += 1
 
-    word = [True if s == "1" else False for s in lines[ptr]]
+    word = [s == "1" for s in lines[ptr]]
     ptr += 1
 
     initial_state = int(lines[ptr])

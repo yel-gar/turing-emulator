@@ -32,7 +32,7 @@ class TuringInstruction:
         # example: q01q20L
         pattern = re.compile(
             r"q(?P<start_state>[0-9]+)(?P<start_val>[0-1])q(?P<end_state>[0-9]+)(?P<end_val>[0-1])(?P<direction>[LSR])")
-        match = pattern.match(s)
+        match = pattern.fullmatch(s)
         if match is None:
             raise ValueError(f"Invalid TuringInstruction: {s}")
         start_state = int(match.group("start_state"))
